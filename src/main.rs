@@ -16,7 +16,7 @@ fn main() -> io::Result<()> {
     println!("RCControllerInputReport: {:?}\n", RCControllerInputReport::desc());
 
     let mut device = UHIDDevice::create(CreateParams {
-        name: String::from("Test device"),
+        name: String::from("Test RC device"),
         phys: String::from(""),
         uniq: String::from(""),
         bus: Bus::USB,
@@ -29,10 +29,11 @@ fn main() -> io::Result<()> {
     loop {
         thread::sleep(time::Duration::from_millis(1000));
         let report = RCControllerInputReport {
-            yaw: 10,
-            throttle: 10,
-            pitch: 10,
-            roll: 10,
+            yaw: 0,
+            throttle: 255,
+            pitch: 0,
+            roll: 255,
+            buttons: 0,
         };
         unsafe {
             let report_bytes = any_as_u8_slice(&report);

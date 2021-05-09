@@ -32,25 +32,29 @@ pub struct MouseInputReport {
 }
 
 #[gen_hid_descriptor(
-    (collection = APPLICATION, usage_page = GENERIC_DESKTOP, usage = JOYSTICK) = {
+    (collection = APPLICATION, usage_page = GENERIC_DESKTOP, usage = GAMEPAD) = {
         (usage_min = X, usage_max = Y) = { // X, Y
-            #[item_settings data,variable,relative] yaw=input;
+            #[item_settings data,variable,absolute] yaw=input;
             #[item_settings data,variable,relative] throttle=input;
-        }
-    },
-    (collection = APPLICATION, usage_page = GENERIC_DESKTOP, usage = JOYSTICK) = {
-       (usage = 0x32, ) = { // Z
+        };
+        (usage = 0x32, ) = { // Z
             #[item_settings data,variable,relative] pitch=input;
         };
-       (usage = 0x35, ) = { // Rz
+        (usage = 0x35, ) = { // Rz
             #[item_settings data,variable,relative] roll=input;
+        };
+        (usage_page = BUTTON,) = {
+            (usage_min = 0x01, usage_max = 0x04) = { // Button 1 -> Button 4
+                #[packed_bits 4] buttons=input;
+            }
         }
-    }
+    },
 )]
 #[repr(packed)]
 pub struct RCControllerInputReport {
-    pub yaw: i8,
-    pub throttle: i8,
-    pub pitch: i8,
-    pub roll: i8,
+    pub yaw: u8,
+    pub throttle: u8,
+    pub pitch: u8,
+    pub roll: u8,
+    pub buttons: u8,
 }
