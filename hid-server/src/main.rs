@@ -1,44 +1,21 @@
-use std::{io, thread, time};
-use uhid_virt::{Bus, CreateParams, UHIDDevice};
-use usbd_hid::descriptor::SerializedDescriptor;
+use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web_actors::ws;
 
 mod reports;
-use reports::{RCControllerInputReport};
+mod ws_device;
 
-unsafe fn any_as_u8_slice<T: Sized>(p: &T) -> &[u8] {
-    ::std::slice::from_raw_parts(
-        (p as *const T) as *const u8,
-        ::std::mem::size_of::<T>(),
-    )
+use crate::ws_device::WsControllerActor;
+
+async fn ws_handler(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
+    let resp = ws::start(WsControllerActor::new()?, &req, stream);
+    println!("{:?}", resp);
+    resp
 }
 
-fn main() -> io::Result<()> {
-    println!("RCControllerInputReport: {:?}\n", RCControllerInputReport::desc());
-
-    let mut device = UHIDDevice::create(CreateParams {
-        name: String::from("Test RC device"),
-        phys: String::from(""),
-        uniq: String::from(""),
-        bus: Bus::USB,
-        vendor: 0x0b04,
-        product: 0x1867,
-        version: 0,
-        country: 0,
-        rd_data: RCControllerInputReport::desc().to_vec(),
-    })?;
-    loop {
-        thread::sleep(time::Duration::from_millis(1000));
-        let report = RCControllerInputReport {
-            yaw: 0,
-            throttle: 255,
-            pitch: 0,
-            roll: 255,
-            buttons: 0,
-        };
-        unsafe {
-            let report_bytes = any_as_u8_slice(&report);
-            println!("{:?}", report_bytes);
-            device.write(report_bytes)?;
-        };
-    }
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    HttpServer::new(|| App::new().route("/ws", web::get().to(ws_handler)))
+        .bind("0.0.0.0:8080")?
+        .run()
+        .await
 }

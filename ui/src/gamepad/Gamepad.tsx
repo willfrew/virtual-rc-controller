@@ -201,10 +201,10 @@ const Joystick: React.FC<JoystickProps> = ({ size, state, id, dispatch }) => {
                 className={classes.mainPlate}
                 onMouseMove={mouseHandler}
               >
-                mps: {MAIN_PLATE_SCALE}<br/>
+              {/*mps: {MAIN_PLATE_SCALE}<br/>
                 mpm: {mainPlateMargin}<br/>
                 x: {state.x}<br/>
-                y: {state.y}
+                y: {state.y}*/}
                 <div className={classes.crosshairLeft}/>
                 <div className={classes.crosshairRight}/>
                 <div className={classes.crosshairTop}/>

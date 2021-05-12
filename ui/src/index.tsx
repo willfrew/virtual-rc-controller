@@ -8,7 +8,7 @@ import { createGamepadStore, viewportResize } from './gamepad/store';
 import { storeToWebSocket } from './gamepad/websocket';
 
 const store = createGamepadStore();
-// storeToWebSocket(store);
+storeToWebSocket(store);
 
 window.addEventListener('resize', () => {
   store.dispatch(viewportResize(window.innerWidth, window.innerHeight));

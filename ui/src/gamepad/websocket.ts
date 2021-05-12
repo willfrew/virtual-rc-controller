@@ -1,8 +1,9 @@
 import { Unsubscribe } from 'redux';
+import { throttle } from 'lodash';
 import { r } from '../lib/redux';
 import { GamepadState, GamepadStore, GamepadAction } from './store';
 
-const URL = 'ws://192.168.1.XX:8080';
+const URL = 'ws://192.168.1.68:8080/ws';
 
 // State
 
@@ -79,14 +80,22 @@ export type WebSocketPacket = {
 
 export const getPacket = (state: GamepadState): WebSocketPacket => ({
   left: {
-    x: state.joysticks.left.x,
-    y: state.joysticks.left.y,
+    x: Math.floor(state.joysticks.left.x),
+    y: Math.floor(state.joysticks.left.y),
   },
   right: {
-    x: state.joysticks.right.x,
-    y: state.joysticks.right.y,
+    x: Math.floor(state.joysticks.right.x),
+    y: Math.floor(state.joysticks.right.y),
   },
 });
+
+export const getBinaryPacket = (state: GamepadState): Uint8Array =>
+  Uint8Array.from([
+    state.joysticks.left.x, // Yaw
+    state.joysticks.left.y, // Throttle
+    state.joysticks.right.x, // Roll
+    state.joysticks.right.y, // Pitch
+  ]);
 
 export const storeToWebSocket = (store: GamepadStore) => {
   const ws = new WebSocket(URL);
@@ -96,10 +105,12 @@ export const storeToWebSocket = (store: GamepadStore) => {
   ws.addEventListener('open', () => {
     store.dispatch(webSocketConnected());
 
-    subscription = store.subscribe(() => {
-      // TODO debouncing
-      ws.send(JSON.stringify(getPacket(store.getState())));
-    });
+    subscription = store.subscribe(
+      // Throttle messages with max 1 every 100ms
+      throttle(() => {
+        ws.send(getBinaryPacket(store.getState()).buffer);
+      }, 100)
+    );
   });
 
   ws.addEventListener('close', () => {

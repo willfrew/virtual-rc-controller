@@ -33,15 +33,17 @@ pub struct MouseInputReport {
 
 #[gen_hid_descriptor(
     (collection = APPLICATION, usage_page = GENERIC_DESKTOP, usage = GAMEPAD) = {
-        (usage_min = X, usage_max = Y) = { // X, Y
+        (usage = X, ) = {
             #[item_settings data,variable,absolute] yaw=input;
-            #[item_settings data,variable,relative] throttle=input;
+        };
+        (usage = Y, ) = {
+            #[item_settings data,variable,absolute] throttle=input;
         };
         (usage = 0x32, ) = { // Z
-            #[item_settings data,variable,relative] pitch=input;
+            #[item_settings data,variable,absolute] pitch=input;
         };
         (usage = 0x35, ) = { // Rz
-            #[item_settings data,variable,relative] roll=input;
+            #[item_settings data,variable,absolute] roll=input;
         };
         (usage_page = BUTTON,) = {
             (usage_min = 0x01, usage_max = 0x04) = { // Button 1 -> Button 4
